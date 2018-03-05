@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" version="2.5" method="upgrade">
+	<name>payzen</name>
+	<creationDate>May 2017</creationDate>
+	<version>2.0.0</version>
+	<author>Lyra Network</author>
+	<authorEmail>support@payzen.eu</authorEmail>
+	<authorUrl>http://www.lyra-network.com/</authorUrl>
+	<copyright>Copyright (C) 2013-2017 Lyra Network. All rights reserved.</copyright>
+	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
+	<description>This component enables you to setup PayZen cash payment and credit card payment in installments plugins for HikaShop.</description>
+
+	<scriptfile>script.install.php</scriptfile>
+	<administration>
+		<files >
+			<folder>plg_hikashoppayment_payzen</folder>
+			<folder>plg_hikashoppayment_payzenmulti</folder>
+			<folder>classes</folder>
+			<folder>installation_doc</folder>
+			<filename>CHANGELOG.txt</filename>
+			<filename>LICENSE.txt</filename>
+		</files>
+	</administration>
+</extension>
