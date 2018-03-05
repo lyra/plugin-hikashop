@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE install SYSTEM "http://dev.joomla.org/xml/1.6/plugin-install.dtd">
+<install type="plugin" version="1.5" method="upgrade" group="hikashoppayment">
+	<name>PayZen Payment Plugin</name>
+	<creationDate>March 2011</creationDate>
+	<version>1.0d</version>
+	<author>Lyra Network</author>
+	<authorEmail>support@payzen.eu</authorEmail>
+	<authorUrl>http://www.lyra-network.com/</authorUrl>
+	<copyright>Copyright Lyra Network.</copyright>
+	<license></license>
+	<description>This plugin enables you to setup your PayZen payment system</description>
+	
+	<files>
+		<filename plugin="vads">vads.php</filename>
+		<filename>vads_configuration.php</filename>
+		<filename>vads_end.php</filename>
+		<filename>vads_api.php</filename>
+	</files>
+	
+	<languages>
+		<language tag="fr-FR">languages/fr-FR.plg_hikashoppayment_vads.ini</language>
+    </languages>
+	
+	<params addpath="/components/com_hikashop/params"/>
+	
+	<media destination="com_hikashop/images/payment">
+		<filename>PayZen.jpg</filename>
+	</media>
+</install>
