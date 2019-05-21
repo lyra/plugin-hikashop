@@ -1,34 +1,66 @@
 <?php
 /**
- * PayZen V2-Payment Module version 2.0.0 for HikaShop 2.x-3.x. Support contact : support@payzen.eu.
+ * Copyright © Lyra Network.
+ * This file is part of PayZen plugin for HikaShop. See COPYING.md for license details.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @author    Lyra Network (http://www.lyra-network.com/)
- * @copyright 2014-2017 Lyra Network and contributors
- * @license   http://www.gnu.org/licenses/gpl.html  GNU General Public License (GPL v3)
- * @category  payment
- * @package   payzen
+ * @author    Lyra Network (https://www.lyra.com/)
+ * @copyright Lyra Network
+ * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)
  */
+
 defined('_JEXEC') or die('Restricted access');
 
 $params = $this->element->payment_params;
 
-// @formatter:off
+if (!class_exists('com_payzenInstallerScript')) {
+    require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'script.install.php';
+}
+
+$plugin_features = com_payzenInstallerScript::$plugin_features;
+
+$displayKeyTest = '';
+$disableCtxMode = '';
+
+if ($plugin_features['qualif']) {
+    $displayKeyTest = ' style="display: none;"';
+    $disableCtxMode = ' disabled="disabled"';
+}
+
+$signAlgoDesc = JText::_('PAYZEN_SIGN_ALGO_DESC');
+
+if ($plugin_features['shatwo']) {
+    // HMAC-SHA-256 already available, update field description.
+    $signAlgoDesc = preg_replace('#<br /><b>[^<>]+</b>#', '', $signAlgoDesc);
+}
+
+// Get documentation links.
+$docs = '' ;
+$displayDoc = '';
+
+$filenames = glob(rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS. 'com_payzen' . DS . 'installation_doc/PayZen_HikaShop_2.x-3.x_v2.1_*.pdf');
+
+if (empty($filenames)) { // hide if there are no doc files
+    $displayDoc = ' style="display: none;"';
+} else {
+    $languages = array(
+        'fr' => 'Français',
+        'en' => 'English',
+        'es' => 'Español',
+        'de' => 'Deutsch',
+        // Complete when other languages are managed.
+    );
+
+    foreach ($filenames as $filename) {
+        $base_filename = basename($filename, '.pdf');
+        $lang = substr($base_filename, -2); // extract language code
+
+        $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . HIKASHOP_LIVE . 'administrator' . DS . 'components' . DS. 'com_payzen' . DS .
+            'installation_doc/' . $base_filename . '.pdf" target="_blank">' . $languages[$lang] . '</a>';
+    };
+}
 ?>
 
-<!------------------------------- module information ------------------------------------------>
+<!------------------------------- Module information ------------------------------------------>
 <tr>
     <td colspan="2">
         <fieldset>
@@ -40,7 +72,7 @@ $params = $this->element->payment_params;
                         <label><?php echo JText::_('PAYZEN_DEVELOPED_BY'); ?></label>
                     </td>
                     <td>
-                        <a href="http://www.lyra-network.com/" target="_blank">Lyra Network</a>
+                        <a href="https://www.lyra.com/" target="_blank">Lyra Network</a>
                     </td>
                 </tr>
 
@@ -58,29 +90,25 @@ $params = $this->element->payment_params;
                         <label><?php echo JText::_('PAYZEN_CONTRIB_VERSION'); ?></label>
                     </td>
                     <td>
-                        <label>2.0.0</label>
+                        <label>2.1.0</label>
                     </td>
                 </tr>
 
                 <tr>
                     <td class="key">
-                        <label><?php echo JText::_('PAYZEN_PLATFORM_VERSION'); ?></label>
+                        <label><?php echo JText::_('PAYZEN_GATEWAY_VERSION'); ?></label>
                     </td>
                     <td>
                         <label>V2</label>
                     </td>
                 </tr>
 
-                <tr>
-                    <td class="key">
-                        <label><?php echo JText::_('PAYZEN_DOCUMENTAION'); ?></label>
-                    </td>
-                    <td>
-                        <?php
-                        $docUrl = HIKASHOP_LIVE . 'administrator' . DS . 'components' . DS. 'com_payzen' . DS . 'installation_doc' . DS .
-                            'Integration_PayZen_HikaShop_2.x-3.x_v2.0.0.pdf';
-                        ?>
-                        <a style="color: red;" target="_blank" href="<?php echo $docUrl?>"><?php echo JText::_ ('PAYZEN_DOCUMENTAION_TEXT'); ?></a>
+                <tr <?php echo $displayDoc; ?>>
+                    <td colspan="2">
+                       <label style="font-size: 12px; font-weight: bold; color: red; cursor: auto !important; text-transform: uppercase;">
+                           <?php echo JText::_('PAYZEN_DOCUMENTATION_TEXT'); ?>
+                       </label>
+                       <span><?php echo $docs; ?></span>
                     </td>
                 </tr>
             </table>
@@ -88,11 +116,11 @@ $params = $this->element->payment_params;
     </td>
 </tr>
 
-<!------------------------------- platform access ------------------------------------------>
+<!------------------------------- Gateway access ------------------------------------------>
 <tr>
     <td colspan="2">
         <fieldset>
-            <legend><?php echo JText::_('PAYZEN_PLATFORM_ACCESS'); ?></legend>
+            <legend><?php echo JText::_('PAYZEN_GATEWAY_ACCESS'); ?></legend>
 
             <table>
                 <tr>
@@ -100,17 +128,17 @@ $params = $this->element->payment_params;
                         <label for="payzen_site_id"><?php echo JText::_('PAYZEN_SITE_ID'); ?></label>
                     </td>
                     <td>
-                        <input type="text" name="data[payment][payment_params][payzen_site_id]" value="<?php echo @$params->payzen_site_id; ?>" id="payzen_site_id" style="width: 120px;" /><br />
+                        <input type="text" name="data[payment][payment_params][payzen_site_id]" value="<?php echo @$params->payzen_site_id; ?>" id="payzen_site_id" style="width: 120px;" autocomplete="off" /><br />
                         <span style="font-size: 10px; font-style: italic;"><?php echo JText::_('PAYZEN_SITE_ID_DESC'); ?></span>
                     </td>
                 </tr>
 
-                <tr>
+                <tr <?php echo $displayKeyTest; ?> >
                     <td class="key" style="vertical-align: top; white-space: normal !important;">
                         <label for="payzen_key_test"><?php echo JText::_('PAYZEN_KEY_TEST'); ?></label>
                     </td>
                     <td>
-                        <input type="text" name="data[payment][payment_params][payzen_key_test]" value="<?php echo @$params->payzen_key_test; ?>" id="payzen_key_test" style="width: 120px;" /><br />
+                        <input type="text" name="data[payment][payment_params][payzen_key_test]" value="<?php echo @$params->payzen_key_test; ?>" id="payzen_key_test" style="width: 120px;" autocomplete="off" /><br />
                         <span style="font-size: 10px; font-style: italic;"><?php echo JText::_('PAYZEN_KEY_TEST_DESC'); ?></span>
                     </td>
                 </tr>
@@ -120,7 +148,7 @@ $params = $this->element->payment_params;
                         <label for="payzen_key_prod"><?php echo JText::_('PAYZEN_KEY_PROD'); ?></label>
                     </td>
                     <td>
-                        <input type="text" name="data[payment][payment_params][payzen_key_prod]" value="<?php echo @$params->payzen_key_prod; ?>" id="payzen_key_prod" style="width: 120px;" /><br />
+                        <input type="text" name="data[payment][payment_params][payzen_key_prod]" value="<?php echo @$params->payzen_key_prod; ?>" id="payzen_key_prod" style="width: 120px;" autocomplete="off" /><br />
                         <span style="font-size: 10px; font-style: italic;"><?php echo JText::_('PAYZEN_KEY_PROD_DESC'); ?></span>
                     </td>
                 </tr>
@@ -130,9 +158,9 @@ $params = $this->element->payment_params;
                         <label for="payzen_ctx_mode"><?php echo JText::_('PAYZEN_CTX_MODE'); ?></label>
                     </td>
                     <td>
-                        <select name="data[payment][payment_params][payzen_ctx_mode]" class="inputbox" id="payzen_ctx_mode" style="width: 122px;" >
-                            <option <?php if (@$params->payzen_ctx_mode == 'TEST') echo 'selected="selected"'; ?> value="TEST"><?php echo JText::_('PAYZEN_CTX_MODE_TEST'); ?></option>
-                            <option <?php if (@$params->payzen_ctx_mode == 'PRODUCTION') echo 'selected="selected"'; ?> value="PRODUCTION"><?php echo JText::_('PAYZEN_CTX_MODE_PROD'); ?></option>
+                        <select name="data[payment][payment_params][payzen_ctx_mode]" class="inputbox" id="payzen_ctx_mode" style="width: 122px;" <?php echo $disableCtxMode; ?> >
+                            <option <?php if (@$params->payzen_ctx_mode === 'TEST') echo 'selected="selected"'; ?> value="TEST"><?php echo JText::_('PAYZEN_CTX_MODE_TEST'); ?></option>
+                            <option <?php if (@$params->payzen_ctx_mode === 'PRODUCTION') echo 'selected="selected"'; ?> value="PRODUCTION"><?php echo JText::_('PAYZEN_CTX_MODE_PROD'); ?></option>
                         </select><br />
                         <span style="font-size: 10px; font-style: italic;"><?php echo JText::_('PAYZEN_CTX_MODE_DESC'); ?></span>
                     </td>
@@ -140,11 +168,14 @@ $params = $this->element->payment_params;
 
                 <tr>
                     <td class="key" style="vertical-align: top; white-space: normal !important;">
-                        <label for="payzen_platform_url"><?php echo JText::_('PAYZEN_PLATFORM_URL'); ?></label>
+                        <label for="payzen_sign_algo"><?php echo JText::_('PAYZEN_SIGN_ALGO'); ?></label>
                     </td>
                     <td>
-                        <input type="text" name="data[payment][payment_params][payzen_platform_url]" value="<?php echo @$params->payzen_platform_url; ?>" id="payzen_platform_url" style="width: 300px;" /><br />
-                        <span style="font-size: 10px; font-style: italic;"><?php echo JText::_('PAYZEN_PLATFORM_URL_DESC'); ?></span>
+                        <select name="data[payment][payment_params][payzen_sign_algo]" class="inputbox" id="payzen_sign_algo" style="width: 122px;" >
+                            <option <?php if (@$params->payzen_sign_algo === 'SHA-1') echo 'selected="selected"'; ?> value="SHA-1">SHA-1</option>
+                            <option <?php if (@$params->payzen_sign_algo === 'SHA-256') echo 'selected="selected"'; ?> value="SHA-256">HMAC-SHA-256</option>
+                        </select><br />
+                        <span style="font-size: 10px; font-style: italic;"><?php echo $signAlgoDesc; ?></span>
                     </td>
                 </tr>
 
@@ -153,8 +184,19 @@ $params = $this->element->payment_params;
                         <label><?php echo JText::_('PAYZEN_IPN_URL'); ?></label>
                     </td>
                     <td>
-                        <label><?php echo '<b>' . HIKASHOP_LIVE . 'index.php?option=com_hikashop&amp;ctrl=checkout&amp;task=notify&amp;notif_payment=payzen&amp;tmpl=component</b>'; ?></label><br />
-                        <span style="font-size: 10px; font-style: italic;"><?php echo JText::_('PAYZEN_IPN_URL_DESC'); ?></span>
+                        <label><span style="font-weight: bold;"><?php echo HIKASHOP_LIVE . 'index.php?option=com_hikashop&amp;ctrl=checkout&amp;task=notify&amp;notif_payment=payzen&amp;tmpl=component'; ?></span></label><br />
+                        <img src="<?php echo HIKASHOP_LIVE . 'administrator' . DS . 'components' . DS . 'com_payzen' . DS  ; ?>images/warn.png">
+                        <span style="font-size: 12px; font-style: italic; color: red; display: inline-block;"><?php echo JText::_('PAYZEN_IPN_URL_DESC'); ?></span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="key" style="vertical-align: top; white-space: normal !important;">
+                        <label for="payzen_platform_url"><?php echo JText::_('PAYZEN_GATEWAY_URL'); ?></label>
+                    </td>
+                    <td>
+                        <input type="text" name="data[payment][payment_params][payzen_platform_url]" value="<?php echo @$params->payzen_platform_url; ?>" id="payzen_platform_url" style="width: 300px;" /><br />
+                        <span style="font-size: 10px; font-style: italic;"><?php echo JText::_('PAYZEN_GATEWAY_URL_DESC'); ?></span>
                     </td>
                 </tr>
             </table>
@@ -162,7 +204,7 @@ $params = $this->element->payment_params;
     </td>
 </tr>
 
-<!------------------------------- payment page ------------------------------------------>
+<!------------------------------- Payment page ------------------------------------------>
 <tr>
     <td colspan="2">
         <fieldset>
@@ -177,7 +219,7 @@ $params = $this->element->payment_params;
                         <select name="data[payment][payment_params][payzen_language]" class="inputbox" id="payzen_language" style="width: 122px;" >
                             <?php
                             foreach (PayzenApi::getSupportedLanguages() as $code => $label) {
-                                $selected = (@$params->payzen_language == $code) ? ' selected="selected"' : '';
+                                $selected = (@$params->payzen_language === $code) ? ' selected="selected"' : '';
                                 echo '<option' . $selected . ' value="'. $code . '">' . JText::_('PAYZEN_LANGUAGE_' . strtoupper($label)) . '</option>';
                             }
                             ?>
@@ -220,9 +262,9 @@ $params = $this->element->payment_params;
                     </td>
                     <td>
                         <select name="data[payment][payment_params][payzen_validation_mode]" class="inputbox" id="payzen_validation_mode" style="width: 122px;" >
-                            <option <?php if (@$params->payzen_validation_mode == '')  echo 'selected="selected"'; ?>value=''><?php echo JText::_('PAYZEN_MODE_DEFAULT'); ?></option>
-                            <option <?php if (@$params->payzen_validation_mode == '0') echo 'selected="selected"'; ?>value='0'><?php echo JText::_('PAYZEN_MODE_AUTOMATIC'); ?></option>
-                            <option <?php if (@$params->payzen_validation_mode == '1') echo 'selected="selected"'; ?>value='1'><?php echo JText::_('PAYZEN_MODE_MANUAL'); ?></option>
+                            <option <?php if (@$params->payzen_validation_mode === '')  echo 'selected="selected"'; ?>value=''><?php echo JText::_('PAYZEN_MODE_DEFAULT'); ?></option>
+                            <option <?php if (@$params->payzen_validation_mode === '0') echo 'selected="selected"'; ?>value='0'><?php echo JText::_('PAYZEN_MODE_AUTOMATIC'); ?></option>
+                            <option <?php if (@$params->payzen_validation_mode === '1') echo 'selected="selected"'; ?>value='1'><?php echo JText::_('PAYZEN_MODE_MANUAL'); ?></option>
                         </select><br />
                         <span style="font-size: 10px; font-style: italic;"><?php echo JText::_('PAYZEN_VALIDATION_MODE_DESC'); ?></span>
                     </td>
@@ -250,7 +292,7 @@ $params = $this->element->payment_params;
     </td>
 </tr>
 
-<!------------------------------- selective 3-DS ------------------------------------------>
+<!------------------------------- Selective 3DS ------------------------------------------>
 <tr>
     <td colspan="2">
         <fieldset>
@@ -271,7 +313,7 @@ $params = $this->element->payment_params;
     </td>
 </tr>
 
-<!------------------------------- return to shop ------------------------------------------>
+<!------------------------------- Return to shop ------------------------------------------>
 <tr>
     <td colspan="2">
         <fieldset>
@@ -334,8 +376,8 @@ $params = $this->element->payment_params;
                     </td>
                     <td>
                         <select  name="data[payment][payment_params][payzen_return_mode]" class="inputbox" id="payzen_return_mode" style="width: 122px;" >
-                            <option<?php if (@$params->payzen_return_mode == 'GET') echo ' selected="selected"'; ?> value='GET'>GET</option>
-                            <option<?php if (@$params->payzen_return_mode == 'POST') echo ' selected="selected"'; ?> value='POST'>POST</option>
+                            <option<?php if (@$params->payzen_return_mode === 'GET') echo ' selected="selected"'; ?> value='GET'>GET</option>
+                            <option<?php if (@$params->payzen_return_mode === 'POST') echo ' selected="selected"'; ?> value='POST'>POST</option>
                         </select><br />
                         <span style="font-size: 10px; font-style: italic;"><?php echo JText::_('PAYZEN_RETURN_MODE_DESC'); ?></span>
                     </td>
