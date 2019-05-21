@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright © Lyra Network.
+ * This file is part of PayZen plugin for HikaShop. See COPYING.md for license details.
+ *
+ * @author	Lyra Network (https://www.lyra.com/)
+ * @copyright Lyra Network
+ * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)
+ */
+-->
+
 <extension type="component" version="2.5" method="upgrade">
 	<name>payzen</name>
-	<creationDate>May 2017</creationDate>
-	<version>2.0.0</version>
+	<creationDate>Mars 2019</creationDate>
+	<version>2.1.0</version>
 	<author>Lyra Network</author>
 	<authorEmail>support@payzen.eu</authorEmail>
-	<authorUrl>http://www.lyra-network.com/</authorUrl>
-	<copyright>Copyright (C) 2013-2017 Lyra Network. All rights reserved.</copyright>
-	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
-	<description>This component enables you to setup PayZen cash payment and credit card payment in installments plugins for HikaShop.</description>
+	<authorUrl>https://www.lyra.com/</authorUrl>
+	<copyright>Copyright (C) 2013-2019 Lyra Network. All rights reserved.</copyright>
+	<license>http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)</license>
+	<description>This component enables you to setup PayZen standard payment and payment in installments plugins for HikaShop.</description>
 
 	<scriptfile>script.install.php</scriptfile>
 	<administration>
@@ -16,8 +27,11 @@
 			<folder>plg_hikashoppayment_payzen</folder>
 			<folder>plg_hikashoppayment_payzenmulti</folder>
 			<folder>classes</folder>
+			<folder>images</folder>
 			<folder>installation_doc</folder>
-			<filename>CHANGELOG.txt</filename>
+			<filename>CHANGELOG.md</filename>
+			<filename>COPYING.md</filename>
+			<filename>README.md</filename>
 			<filename>LICENSE.txt</filename>
 		</files>
 	</administration>

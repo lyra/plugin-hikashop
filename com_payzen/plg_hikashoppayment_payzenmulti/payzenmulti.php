@@ -1,36 +1,28 @@
 <?php
 /**
-  * PayZen V2-Payment Module version 2.0.0 for HikaShop 2.x-3.x. Support contact : support@payzen.eu.
+ * Copyright © Lyra Network.
+ * This file is part of PayZen plugin for HikaShop. See COPYING.md for license details.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @author    Lyra Network (http://www.lyra-network.com/)
- * @copyright 2014-2017 Lyra Network and contributors
- * @license   http://www.gnu.org/licenses/gpl.html  GNU General Public License (GPL v3)
- * @category  payment
- * @package   payzen
+ * @author    Lyra Network (https://www.lyra.com/)
+ * @copyright Lyra Network
+ * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)
  */
+
 defined('_JEXEC') or die('Restricted access');
 
-// load PayZen language constants
+// Load plugins translations.
 $lang = JFactory::getLanguage();
 $lang->load('plg_hikashoppayment_payzenmulti', JPATH_ADMINISTRATOR);
 
-// load PayzenApi
+// Load gateway API.
 if (! class_exists('PayzenApi')) {
-    require_once (rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
-         'payzen_api.php');
+    require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
+         'payzen_api.php';
+}
+
+// Load plugin features class.
+if (! class_exists('com_payzenInstallerScript')) {
+    require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'script.install.php';
 }
 
 class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
@@ -47,22 +39,26 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
     function __construct(&$subject, $config)
     {
         foreach (PayzenApi::getSupportedCurrencies() as $currency) {
-            // currency alpha3 code
+            // Currency alpha3 code.
             $this->accepted_currencies[] = $currency->getAlpha3();
         }
+
+        // Plugin features.
+        $this->plugin_features = com_payzenInstallerScript::$plugin_features;
 
         parent::__construct($subject, $config);
     }
 
     function onPaymentSave(&$cart, &$rates, &$payment_id)
     {
-        $_SESSION['payzen_multi_option'] = @$_REQUEST['payzen_multi_option'];
+        $session = JFactory::getSession();
+        $session->set('payzen_multi_option', JRequest::getVar('payzen_multi_option'));
 
         return parent::onPaymentSave($cart, $rates, $payment_id);
     }
 
     /**
-     * Called by Hikashop before redirect to PayZen payment platform.
+     * Called by HikaShop before redirect to payment gateway.
      * Construct array of parameters here.
      *
      * @param $order
@@ -73,32 +69,34 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
     {
         parent::onAfterOrderConfirm($order, $methods, $method_id);
 
-        // process shop language
+        // Process shop language.
         $lang = JFactory::getLanguage();
         $langCode = strtoupper(substr($lang->get('tag'), 0, 2));
         $payzenmultiLanguage = PayzenApi::isSupportedLanguage($langCode) ? $langCode : $this->payment_params->payzenmulti_language;
 
-        // process currency
+        // Process currency.
         $payzenmultiCurrency = PayzenApi::findCurrencyByAlphaCode($this->currency->currency_code);
 
-        // amount
+        // Amount.
         $price = $order->cart->full_total->prices[0];
-        $amount = round($price->price_value_with_tax,
-            hikashop_get('class.currency')->getRounding($price->price_currency_id));
+        $amount = round(
+            $price->price_value_with_tax,
+            hikashop_get('class.currency')->getRounding($price->price_currency_id)
+        );
 
-        // 3-DS activation according to amount
+        // 3DS activation according to amount.
         $threedsMpi = null;
         if ($this->payment_params->payzenmulti_threeds_amount_min &&
              $amount < $this->payment_params->payzenmulti_threeds_amount_min) {
             $threedsMpi = '2';
         }
 
-        // load config to retrieve hikashop version
+        // Load config to retrieve hikashop version.
         $config = hikashop_config();
 
         $this->vars = array(
             'amount' => $payzenmultiCurrency->convertAmountToInteger($amount),
-            'contrib' => 'HikaShop2.x-3.x_2.0.0/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
+            'contrib' => 'HikaShop2.x-3.x_2.1.0/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
             'currency' => $payzenmultiCurrency->getNum(),
             'language' => $payzenmultiLanguage,
             'order_id' => $order->order_number,
@@ -138,6 +136,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             'key_test',
             'key_prod',
             'ctx_mode',
+            'sign_algo',
             'platform_url',
             'available_languages',
             'capture_delay',
@@ -155,25 +154,34 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             $this->vars[$param] = $this->payment_params->$paramName;
         }
 
-        // prepare payment in installements data
-        $multi_options = $this->payment_params->payzen_multi_options;
-        $selected_option = $multi_options[$_SESSION['payzen_multi_option']];
-        $configFirst = $selected_option['first'];
+        if ($this->plugin_features['qualif']) {
+            // Tests will be made on qualif, no test mode available.
+            $this->vars['ctx_mode'] ='PRODUCTION';
+        }
+
+        // Prepare payment in installements data.
+        $multiOptions = $this->payment_params->payzen_multi_options;
+
+        $session = JFactory::getSession();
+        $selectedOption = $multiOptions[$session->get('payzen_multi_option')]; // The selected payment option.
+
+        $configFirst = $selectedOption['first'];
         $first = ! empty($configFirst) ? $payzenmultiCurrency->convertAmountToInteger(($configFirst / 100) * $amount) : null;
         $this->multivars = array(
-            'count' => $selected_option['count'],
-            'period' => $selected_option['period'],
+            'count' => $selectedOption['count'],
+            'period' => $selectedOption['period'],
             'first' => $first
         );
-        if (isset($selected_option['contract']) && $selected_option['contract']) {
-            $this->multivars['contract'] = 'CB=' . $selected_option['contract'];
+
+        if (isset($selectedOption['contract']) && $selectedOption['contract']) {
+            $this->multivars['contract'] = 'CB=' . $selectedOption['contract'];
         }
 
         return $this->showPage('end');
     }
 
     /**
-     * Notify payment after callback from PayZen platform.
+     * Notify payment after callback from payment gateway.
      *
      * @param $statuses
      * @return boolean
@@ -183,12 +191,11 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         $app = JFactory::getApplication();
 
         if (JRequest::getVar('vads_hash') !== null) {
-            // this is a server call
-
+            // This is a server call.
             if ((! ($payCfg = JRequest::getVar('vads_payment_config')) || stripos($payCfg, 'MULTI') === false) &&
                  (! ($contrib = JRequest::getVar('vads_contrib')) || stripos($contrib, 'multi') === false)) {
 
-                // single payment : let Single module do the work
+                // Single payment : let Single module do the work.
                 $data = hikashop_import('hikashoppayment', 'payzen');
                 if (! empty($data)) {
                     return $data->onPaymentNotification($statuses);
@@ -196,7 +203,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             }
         }
 
-        // load payment method parameters
+        // Load payment method parameters.
         $pluginsClass = hikashop::get('class.plugins');
         $elements = $pluginsClass->getMethods('payment', 'payzenmulti');
         if (empty($elements)) {
@@ -206,19 +213,23 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         $element = reset($elements);
         $urlItemId = JRequest::getInt('Itemid') ? '&Itemid=' . JRequest::getInt('Itemid') : '';
 
-        require_once (rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
-             'payzen_response.php');
-        $payzenmultiResponse = new PayzenResponse($_REQUEST, $element->payment_params->payzenmulti_ctx_mode,
-            $element->payment_params->payzenmulti_key_test, $element->payment_params->payzenmulti_key_prod);
+        require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
+             'payzen_response.php';
 
-        $fromServer = ($payzenmultiResponse->get('hash') != null);
+        $data = isset($_POST['vads_order_id']) ? $_POST : $_GET;
+        $payzenmultiResponse = new PayzenResponse(
+            $data,
+            $element->payment_params->payzenmulti_ctx_mode,
+            $element->payment_params->payzenmulti_key_test,
+            $element->payment_params->payzenmulti_key_prod,
+            $element->payment_params->payzenmulti_sign_algo
+         );
 
-        if ($fromServer) {
-            $this->log('Response received from PayZen server URL: ' . print_r($_REQUEST, true));
-        }
+        $fromServer = ($payzenmultiResponse->get('hash') !== null);
 
         if (! $payzenmultiResponse->isAuthentified()) {
-            $this->log('Received invalid response from PayZen: authentication failed.');
+            $this->log("Received invalid response from return/IPN URL with data: " . print_r($data, true));
+            $this->log('Signature algorithm selected in module settings must be the same as one selected in gateway Back Office.');
 
             if ($fromServer) {
                 $this->log('SERVER URL PROCESS END');
@@ -231,13 +242,13 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             }
         }
 
-        // retrieve order info from database
+        // Retrieve order info from database.
         $orderClass = hikashop::get('class.order');
         $orderId = hikashop::decode($payzenmultiResponse->get('order_id')); // order_id from order_number
         $order = $orderClass->get((int) $orderId);
 
         if (empty($order)) {
-            // order not found
+            // Order not found.
             $this->log('Error: Order (' . $orderId . ') not found or key does not match received invoice ID.');
 
             if ($fromServer) {
@@ -251,29 +262,24 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             }
         }
 
-        if ($element->payment_params->payzenmulti_ctx_mode == 'TEST') {
-            $app->enqueueMessage(
-                JText::_('PAYZENMULTI_SHOP_TO_PROD_INFO') .
-                     '<a href="https://secure.payzen.eu/html/faq/prod" target="_blank">https://secure.payzen.eu/html/faq/prod</a>', 'notice');
+        if ($element->payment_params->payzenmulti_ctx_mode === 'TEST' && $this->plugin_features['prodfaq']) {
+            $app->enqueueMessage(JText::_('PAYZENMULTI_SHOP_TO_PROD_INFO'));
         }
 
-        // redirect to those URLs
-        $success_url = hikashop_completeLink('checkout&task=after_end&order_id=' . $order->order_id . $urlItemId, false,
-            true);
-        $error_url = hikashop_completeLink('order&task=cancel_order&order_id=' . $order->order_id . $urlItemId, false,
-            true);
+        // Redirect to those URLs.
+        $success_url = hikashop_completeLink('checkout&task=after_end&order_id=' . $order->order_id . $urlItemId, false, true);
+        $error_url = hikashop_completeLink('order&task=cancel_order&order_id=' . $order->order_id . $urlItemId, false, true);
 
-        // if unpaid order : reset order status
+        // If unpaid order : reset order status.
         $unpaid_statuses = hikashop_config()->get('order_unpaid_statuses') ? explode(',',
             hikashop_config()->get('order_unpaid_statuses')) : array();
         if (hikashop_config()->get('allow_payment_button') && in_array($order->order_status, $unpaid_statuses)) {
             $order->order_status = hikashop_config()->get('order_created_status');
         }
 
-        // process according to order status and payment result
-        if ($order->order_status == hikashop_config()->get('order_created_status')) {
-            // order not processed yet
-
+        // Process according to order status and payment result.
+        if ($order->order_status === hikashop_config()->get('order_created_status')) {
+            // Order not processed yet.
             if ($payzenmultiResponse->isAcceptedPayment()) {
                 $this->log('Payment successfull, let\'s save order #' . $orderId);
 
@@ -282,8 +288,13 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
                     $this->modifyOrder($order->order_id, $element->payment_params->payzenmulti_verified_status,
                         $history);
                 } else {
-                    $this->_confirmOrder($order, $element->payment_params->payzenmulti_verified_status, $element,
-                        $payzenmultiResponse, 1);
+                    $this->_confirmOrder(
+                        $order,
+                        $element->payment_params->payzenmulti_verified_status,
+                        $element,
+                        $payzenmultiResponse,
+                        1
+                    );
                 }
 
                 if ($fromServer) {
@@ -292,11 +303,9 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
                     die($payzenmultiResponse->getOutputForGateway('payment_ok'));
                 } else {
                     $this->log('Warning ! IPN URL call has not worked. Payment completed by return URL call.');
-                    if ($element->payment_params->payzenmulti_ctx_mode == 'TEST') {
-                        // test mode warning : check URL not correctly called
-                        $app->enqueueMessage(
-                            JText::_('PAYZENMULTI_CHECK_URL_WARN') . '<br />' .
-                                 JText::_('PAYZENMULTI_CHECK_URL_WARN_DETAILS'), 'error');
+                    if ($element->payment_params->payzenmulti_ctx_mode === 'TEST') {
+                        // Test mode warning : check URL not correctly called.
+                        $app->enqueueMessage(JText::_('PAYZENMULTI_CHECK_URL_WARN') . '<br />' . JText::_('PAYZENMULTI_CHECK_URL_WARN_DETAILS'), 'error');
                     }
 
                     $this->log('RETURN URL PROCESS END');
@@ -308,8 +317,12 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
                     $history = $this->_createOrderHistory($payzenmultiResponse, $element);
                     $this->modifyOrder($order->order_id, $element->payment_params->payzenmulti_invalid_status, $history);
                 } else {
-                    $this->_confirmOrder($order, $element->payment_params->payzenmulti_invalid_status, $element,
-                        $payzenmultiResponse);
+                    $this->_confirmOrder(
+                        $order,
+                        $element->payment_params->payzenmulti_invalid_status,
+                        $element,
+                        $payzenmultiResponse
+                    );
                 }
 
                 $this->log('Payment failed or cancelled. ' . $payzenmultiResponse->getLogMessage());
@@ -318,13 +331,13 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
                     die($payzenmultiResponse->getOutputForGateway('payment_ko'));
                 } else {
                     $this->log('RETURN URL PROCESS END');
-                    $app->enqueueMessage(JText::_('PAYZENMULTI_ERROR_MSG'), 'error');
+                    $app->enqueueMessage(JText::_('PAYZENMULTI_FAILURE_MSG'), 'error');
                     $app->redirect($error_url);
                     die();
                 }
             }
         } else {
-            // order already processed
+            // Order already processed.
             $this->log('Order #' . $orderId . ' is already processed. Just show payment result.');
             if ($payzenmultiResponse->isAcceptedPayment() &&
                  ($order->order_status === $element->payment_params->payzenmulti_verified_status)) {
@@ -345,14 +358,16 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
                     die($payzenmultiResponse->getOutputForGateway('payment_ko_already_done'));
                 } else {
                     $this->log('RETURN URL PROCESS END');
-                    $app->enqueueMessage(JText::_('PAYZENMULTI_ERROR_MSG'), 'error');
+                    $app->enqueueMessage(JText::_('PAYZENMULTI_FAILURE_MSG'), 'error');
                     $app->redirect($error_url);
                     die();
                 }
             } else {
                 $this->log(
                     'Error ! Invalid payment result received for already saved order. Payment result : ' .
-                         $payzenmultiResponse->get('result') . ', Order status : ' . $order->order_status);
+                    $payzenmultiResponse->get('result') . ', Order status : ' . $order->order_status
+                );
+
                 if ($fromServer) {
                     $this->log('SERVER URL PROCESS END');
                     die($payzenmultiResponse->getOutputForGateway('payment_ko_on_order_ok'));
@@ -366,10 +381,10 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         }
     }
 
-    // private : create and save order
+    // Private : create and save order.
     function _confirmOrder($orderData, $newStatus, $payment, $payzenmultiResponse, $notify = 0)
     {
-        // prepare order and history order
+        // Prepare order and history order.
         $order = new stdClass();
         $order->order_id = $orderData->order_id;
         $order->order_status = $newStatus;
@@ -383,7 +398,8 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             $key = 'history_' . $key;
             $order->history->$key = $value;
         }
-        // save order and history order
+
+        // Save order and history order.
         $orderClass = hikashop::get('class.order');
         $orderClass->save($order);
     }
@@ -400,7 +416,27 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         $history->notified = $notify;
 
         $info = JText::_('PAYZENMULTI_RESULT') . $payzenmultiResponse->getMessage();
+
         $info .= ' | ' . JText::_('PAYZENMULTI_TRANS_ID') . $payzenmultiResponse->get('trans_id');
+
+        if ($payzenmultiResponse->get('card_brand')) {
+            $info .= ' | ' . JText::_('PAYZENMULTI_CC_TYPE') . $payzenmultiResponse->get('card_brand');
+
+            // Add  card brand user choice.
+            if ($payzenmultiResponse->get('brand_management')) {
+                $brand_info = json_decode($payzenmultiResponse->get('brand_management'));
+                $msg_brand_choice = '';
+
+                if (isset($brand_info->userChoice) && $brand_info->userChoice) {
+                    $msg_brand_choice .= JText::_('PAYZENMULTI_CARD_BRAND_BUYER_CHOICE');
+                } else {
+                    $msg_brand_choice .= JText::_('PAYZENMULTI_CARD_BRAND_DEFAULT_CHOICE');
+                }
+
+                $info .= ' (' . $msg_brand_choice . ')';
+            }
+        }
+
         if ($payzenmultiResponse->get('card_number')) {
             $info .= ' | ' . JText::_('PAYZENMULTI_CC_NUMBER') . $payzenmultiResponse->get('card_number');
         }
@@ -411,17 +447,13 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
                  $payzenmultiResponse->get('expiry_year');
         }
 
-        if ($payzenmultiResponse->get('card_brand')) {
-            $info .= ' | ' . JText::_('PAYZENMULTI_CC_TYPE') . $payzenmultiResponse->get('card_brand');
-        }
-
         $history->data = $info;
 
         return $history;
     }
 
     /**
-     * Called before load PayZen module configuration page.
+     * Called before load plugin configuration page.
      *
      * @param $element
      */
@@ -444,11 +476,12 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         $element->payment_description = JText::_('PAYZENMULTI_DEFAULT_DESCRIPTION');
         $element->payment_images = 'payzenmulti_cards';
 
-        // default values
+        // Default values.
         $element->payment_params->payzenmulti_site_id = '12345678';
         $element->payment_params->payzenmulti_key_test = '1111111111111111';
         $element->payment_params->payzenmulti_key_prod = '2222222222222222';
         $element->payment_params->payzenmulti_ctx_mode = 'TEST';
+        $element->payment_params->payzenmulti_sign_algo = 'SHA-256';
         $element->payment_params->payzenmulti_platform_url = 'https://secure.payzen.eu/vads-payment/';
         $element->payment_params->payzenmulti_language = 'fr';
         $element->payment_params->payzenmulti_available_languages = '';
@@ -458,16 +491,16 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         $element->payment_params->payzenmulti_threeds_amount_min = '';
         $element->payment_params->payzenmulti_redirect_enabled = 0;
         $element->payment_params->payzenmulti_redirect_success_timeout = '5';
-        $element->payment_params->payzenmulti_redirect_success_message = 'Redirection vers la boutique dans quelques instants...';
+        $element->payment_params->payzenmulti_redirect_success_message = JText::_('PAYZENMULTI_REDIRECT_SUCCESS_MESSAGE_DFEAULT');
         $element->payment_params->payzenmulti_redirect_error_timeout = '5';
-        $element->payment_params->payzenmulti_redirect_error_message = 'Redirection vers la boutique dans quelques instants...';
+        $element->payment_params->payzenmulti_redirect_error_message = JText::_('PAYZENMULTI_REDIRECT_ERROR_MESSAGE_DFEAULT');
         $element->payment_params->payzenmulti_return_mode = 'GET';
         $element->payment_params->payzenmulti_verified_status = 'confirmed';
         $element->payment_params->payzenmulti_invalid_status = 'cancelled';
     }
 
     /**
-     * Called before save PayZen module configuration.
+     * Called before save plugin configuration.
      *
      * @param $element
      * @return boolean
@@ -488,15 +521,15 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
 
         $element->payment_params->payzenmulti_payment_cards = implode(';', $cards);
 
-        // configuration fields validation
+        // Configuration fields validation.
         $errors = array();
-        $multi_options = @$element->payment_params->payzen_multi_options;
-        if (! is_array($multi_options)) {
-            $multi_options = array();
+        $multiOptions = @$element->payment_params->payzen_multi_options;
+        if (! is_array($multiOptions)) {
+            $multiOptions = array();
         }
 
         $line = 1;
-        foreach ($multi_options as $key => $option) {
+        foreach ($multiOptions as $option) {
             $count = $option['count'];
             $period = $option['period'];
             $first = $option['first'];
@@ -524,6 +557,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             'key_test',
             'key_prod',
             'ctx_mode',
+            'sign_algo',
             'platform_url',
             'capture_delay',
             'validation_mode',
@@ -535,9 +569,14 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             'return_mode'
         );
 
-        // instanciate PayzenRequest to validate parameters
-        require_once (rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
-             'payzen_request.php');
+        if ($this->plugin_features['qualif']) {
+            // Tests will be made on qualif, no test mode available.
+            unset($params['3']); // ctx_mode
+        }
+
+        // Instanciate PayzenRequest to validate parameters.
+        require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
+             'payzen_request.php';
         $request = new PayzenRequest();
 
         foreach ($params as $param) {
@@ -561,21 +600,21 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         return true;
     }
 
-    // apply amount resrictions of each option of the payment in installements then show the available options in
-    // frontend
+    // Apply amount resrictions of each option of the payment in installements then show the available options in.
+    // Frontend.
     function onPaymentDisplay(&$order, &$methods, &$usable_methods)
     {
         if (isset($methods)) {
             $order_total = $order->full_total->prices[0]->price_value_with_tax;
             foreach ($methods as $key => $method) {
-                if ($method->payment_type == $this->name) {
-                    $multi_options = $this->_getAvailbleMultiOptions($method->payment_params->payzen_multi_options,
+                if ($method->payment_type === $this->name) {
+                    $multiOptions = $this->_getAvailbleMultiOptions($method->payment_params->payzen_multi_options,
                         $order_total);
 
-                    if (! count($multi_options)) {
+                    if (! count($multiOptions)) {
                         unset($methods[$key]);
                     } else {
-                        $method->custom_html = $this->_getCustomHtml($multi_options);
+                        $method->custom_html = $this->_getCustomHtml($multiOptions);
                     }
                 }
             }
@@ -609,25 +648,27 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         return $available_options;
     }
 
-    // show payment in installements options in frontend
-    function _getCustomHtml($multi_options)
+    // Show payment in installements options in frontend.
+    function _getCustomHtml($multiOptions)
     {
-        $title = (count($multi_options) == 1) ? JText::_('PAYZENMULTI_ONE_OPTION_SELECT_TITLE') : JText::_(
-            'PAYZENMULTI_SEVERAL_OPTIONS_SELECT_TITLE');
-        $result = array();
-        $first = true;
-        foreach ($multi_options as $key => $option) {
-            $result[] = JHTML::_('select.option', $key, $option['label']);
-            if ($first) {
-                $selected_key = $key;
-            }
+        $title = (count($multiOptions) === 1) ? JText::_('PAYZENMULTI_ONE_OPTION_SELECT_TITLE') :
+            JText::_('PAYZENMULTI_SEVERAL_OPTIONS_SELECT_TITLE');
 
-            $first = false;
+        $result = array();
+        $selected = false;
+        $first = true;
+        foreach ($multiOptions as $key => $option) {
+            $result[] = JHTML::_('select.option', $key, $option['label']);
+
+            if ($first) {
+                $selected = $key;
+                $first = false;
+            }
         }
 
-        if (isset($_SESSION['payzen_multi_option']) && array_key_exists($_SESSION['payzen_multi_option'],
-            $multi_options)) {
-            $selected_key = $_SESSION['payzen_multi_option'];
+        $session = JFactory::getSession();
+        if (($key = $session->get('payzen_multi_option')) && isset($multiOptions[$key])) {
+            $selected = $key;
         }
 
         $onclick = '';
@@ -639,13 +680,13 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         $html = '<div style="margin-left:10%; ">';
         $html .= '<span style="font-weight: bold;">' . $title . '</span>';
         $html .= JHTML::_('select.radiolist', $result, 'payzen_multi_option', 'class="inputbox" size="1" ' . $onclick,
-            'value', 'text', $selected_key);
+            'value', 'text', $selected);
         $html .= '</div>';
 
         return $html;
     }
 
-    // copy images to right place
+    // Copy images to right place.
     function _copyImages()
     {
         jimport('joomla.filesystem.folder');
@@ -682,7 +723,8 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             'PRV_OPT',
             'PRV_SOC',
             'VISA',
-            'VISA_ELECTRON'
+            'VISA_ELECTRON',
+            'VPAY'
         );
 
         $all_cards = PayzenApi::getSupportedCardTypes();

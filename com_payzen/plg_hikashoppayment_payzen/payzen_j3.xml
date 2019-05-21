@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright © Lyra Network.
+ * This file is part of PayZen plugin for HikaShop. See COPYING.md for license details.
+ *
+ * @author    Lyra Network (https://www.lyra.com/)
+ * @copyright Lyra Network
+ * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)
+ */
+-->
+
 <extension type="plugin" version="2.5" method="upgrade" group="hikashoppayment">
-	<name>PayZen Payment Plugin</name>
-	<creationDate>May 2017</creationDate>
-	<version>2.0.0</version>
+	<name>PayZen payment plugin</name>
+	<creationDate>Mars 2019</creationDate>
+	<version>2.1.0</version>
 	<author>Lyra Network</author>
 	<authorEmail>support@payzen.eu</authorEmail>
-	<authorUrl>http://www.lyra-network.com/</authorUrl>
-	<copyright>Copyright (C) 2013-2017 Lyra Network. All rights reserved.</copyright>
-	<license>GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html</license>
-	<description>This plugin enables you to setup your PayZen payment system.</description>
+	<authorUrl>https://www.lyra.com/</authorUrl>
+	<copyright>Copyright (C) 2013-2019 Lyra Network. All rights reserved.</copyright>
+	<license>http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)</license>
+	<description>This plugin enables you to setup the PayZen payment gateway.</description>
 
 	<scriptfile>script.install.php</scriptfile>
 
@@ -23,6 +34,7 @@
 		<language tag="fr-FR">languages/fr-FR.plg_hikashoppayment_payzen.ini</language>
 		<language tag="en-GB">languages/en-GB.plg_hikashoppayment_payzen.ini</language>
 		<language tag="de-DE">languages/de-DE.plg_hikashoppayment_payzen.ini</language>
+		<language tag="es-ES">languages/es-ES.plg_hikashoppayment_payzen.ini</language>
 	</languages>
 
 	<params addpath="/components/com_hikashop/params">

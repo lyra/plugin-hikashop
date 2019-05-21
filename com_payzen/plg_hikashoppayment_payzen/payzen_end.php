@@ -1,34 +1,19 @@
 <?php
 /**
- * PayZen V2-Payment Module version 2.0.0 for HikaShop 2.x-3.x. Support contact : support@payzen.eu.
+ * Copyright © Lyra Network.
+ * This file is part of PayZen plugin for HikaShop. See COPYING.md for license details.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- * @author    Lyra Network (http://www.lyra-network.com/)
- * @copyright 2014-2017 Lyra Network and contributors
- * @license   http://www.gnu.org/licenses/gpl.html  GNU General Public License (GPL v3)
- * @category  payment
- * @package   payzen
+ * @author    Lyra Network (https://www.lyra.com/)
+ * @copyright Lyra Network
+ * @license   http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)
  */
+
 defined('_JEXEC') or die('Restricted access');
 
-require_once (rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
-     'payzen_request.php');
+require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
+     'payzen_request.php';
 $payzen = new PayzenRequest();
 $payzen->setFromArray($this->vars);
-
-// @formatter:off
 ?>
 
 <div class="hikashop_payzen_end" id="hikashop_payzen_end">
@@ -44,12 +29,10 @@ $payzen->setFromArray($this->vars);
             <input id="hikashop_payzen_button" type="submit" value="<?php echo JText::_('PAYZEN_SEND_BTN_VALUE'); ?>" name="" alt="<?php echo JText::_('PAYZEN_SEND_BTN_ALT'); ?>" />
         </div>
         <?php
-        // @formatter:on
         echo $payzen->getRequestHtmlFields();
 
         $doc = JFactory::getDocument();
-        $doc->addScriptDeclaration(
-            "window.addEvent('domready', function() { document.getElementById('hikashop_payzen_form').submit(); });");
+        $doc->addScriptDeclaration("window.addEvent('domready', function() { document.getElementById('hikashop_payzen_form').submit(); });");
         JRequest::setVar('noform', 1);
         ?>
     </form>
