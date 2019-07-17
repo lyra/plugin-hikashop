@@ -1,3 +1,6 @@
+2.1.1, 2019-07-15
+- Escape XML special characters.
+ 
 2.1.0, 2019-03-15:
 - Enable signature algorithm selection (SHA-1 or HMAC-SHA-256).
 - Added Spanish translation.
