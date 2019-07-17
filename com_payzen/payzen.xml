@@ -11,15 +11,15 @@
 -->
 
 <install type="component" version="1.5" method="upgrade">
-	<name>payzen</name>
-	<creationDate>Mars 2019</creationDate>
-	<version>2.1.0</version>
+	<name><![CDATA[payzen]]></name>
+	<creationDate>July</creationDate>
+	<version>2.1.1</version>
 	<author>Lyra Network</author>
 	<authorEmail>support@payzen.eu</authorEmail>
 	<authorUrl>https://www.lyra.com/</authorUrl>
 	<copyright>Copyright (C) 2013-2019 Lyra Network. All rights reserved.</copyright>
 	<license>http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)</license>
-	<description>This component enables you to setup PayZen standard payment and payment in installments plugins for HikaShop.</description>
+	<description><![CDATA[This component enables you to setup PayZen standard payment and payment in installments plugins for HikaShop.]]></description>
 
 	<installfile>script.install.php</installfile>
 	<administration>

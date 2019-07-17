@@ -11,15 +11,15 @@
 -->
 
 <install type="plugin" version="1.5" method="upgrade" group="hikashoppayment">
-	<name>PayZen payment plugin</name>
-	<creationDate>Mars 2019</creationDate>
-	<version>2.1.0</version>
+	<name><![CDATA[PayZen payment plugin]]></name>
+	<creationDate>July</creationDate>
+	<version>2.1.1</version>
 	<author>Lyra Network</author>
 	<authorEmail>support@payzen.eu</authorEmail>
 	<authorUrl>https://www.lyra.com/</authorUrl>
 	<copyright>Copyright (C) 2013-2019 Lyra Network. All rights reserved.</copyright>
 	<license>http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)</license>
-	<description>This plugin enables you to setup the PayZen payment gateway.</description>
+	<description><![CDATA[This plugin enables you to setup the PayZen payment gateway.]]></description>
 
 	<installfile>script.install.php</installfile>
 
