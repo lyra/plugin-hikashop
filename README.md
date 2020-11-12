@@ -10,16 +10,16 @@ If a previous version of the PayZen module is installed on your shop, you must u
 
 The module installs as a Joomla extension:
 
-- From the Joomla admin panel, go to Extensions > Manage > Installation and transfer the PayZen zip file.
-- To activate the payment method you will have to go to Extensions > Plugins and look for PayZen. Enable the plugins your need.
+- From the Joomla admin panel, go to `Extensions > Manage > Installation` and transfer the PayZen zip file.
+- To activate the payment method you will have to go to `Extensions > Plugins` and look for PayZen. Enable the plugins your need.
 
 ## Configuration
 
 Once the module is installed, to configure it:
 
-- Go to the Components > HikaShop > Settings menu.
-- Go to System > Payment methods in the general configuration of HikaShop.
-- Click on New (+) button.
+- Go to the `Components > HikaShop > Settings` menu.
+- Go to `System > Payment methods` in the general configuration of HikaShop.
+- Click on `New (+)` button.
 - The list of payment methods is displayed, click on a PayZen payment method and then enter your PayZen credentials.
 
 ## License

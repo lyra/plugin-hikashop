@@ -12,7 +12,6 @@ defined('_JEXEC') or die('Restricted access');
 
 class plghikashoppaymentpayzenmultiInstallerScript
 {
-
     /**
      * Called after any type of action.
      *

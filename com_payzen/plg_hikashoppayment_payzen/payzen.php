@@ -25,7 +25,6 @@ if (! class_exists('com_payzenInstallerScript')) {
 
 class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
 {
-
     var $name = 'payzen';
 
     var $accepted_currencies = array();
@@ -78,12 +77,12 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
             $threedsMpi = '2';
         }
 
-        // Load config to retrieve hikashop version.
+        // Load config to retrieve HikaShop version.
         $config = hikashop_config();
 
         $this->vars = array(
             'amount' => $payzenCurrency->convertAmountToInteger($amount),
-            'contrib' => 'HikaShop_2.x-3.x_2.1.1/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
+            'contrib' => 'HikaShop_2.x-3.x_2.1.2/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
             'currency' => $payzenCurrency->getNum(),
             'language' => $payzenLanguage,
             'order_id' => $order->order_number,
@@ -214,7 +213,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
 
         // Retrieve order info from database.
         $orderClass = hikashop::get('class.order');
-        $orderId = hikashop::decode($payzenResponse->get('order_id')); // order_id from order_number
+        $orderId = hikashop::decode($payzenResponse->get('order_id'));
         $order = $orderClass->get((int) $orderId);
 
         if (empty($order)) {
@@ -251,7 +250,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
         if ($order->order_status === hikashop_config()->get('order_created_status')) {
             // Order not processed yet.
             if ($payzenResponse->isAcceptedPayment()) {
-                $this->log('Payment successfull, let\'s save order #' . $orderId);
+                $this->log("Payment successfull, let's save order #$orderId");
 
                 if (method_exists($this, 'modifyOrder')) {
                     $history = $this->_createOrderHistory($payzenResponse, $element, 1);
@@ -265,7 +264,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
                     $this->log('SERVER URL PROCESS END');
                     die($payzenResponse->getOutputForGateway('payment_ok'));
                 } else {
-                    $this->log('Warning ! IPN URL call has not worked. Payment completed by return URL call.');
+                    $this->log('Warning! IPN URL call has not worked. Payment completed by return URL call.');
                     if ($element->payment_params->payzen_ctx_mode === 'TEST') {
                         // Test mode warning : check URL not correctly called.
                         $app->enqueueMessage(JText::_('PAYZEN_CHECK_URL_WARN') . '<br />' . JText::_('PAYZEN_CHECK_URL_WARN_DETAILS'), 'error');
@@ -296,7 +295,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
             }
         } else {
             // Order already processed.
-            $this->log('Order #' . $orderId . ' is already processed. Just show payment result.');
+            $this->log("Order #$orderId is already processed. Just show payment result.");
             if ($payzenResponse->isAcceptedPayment()
                 && ($order->order_status === $element->payment_params->payzen_verified_status)) {
                 $this->log('Payment successfull reconfirmed.');
@@ -336,7 +335,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
         }
     }
 
-    // Private : create and save order.
+    // Private: create and save order.
     function _confirmOrder($orderData, $newStatus, $payment, $payzenResponse, $notify = 0)
     {
         // Prepare order and history order.
