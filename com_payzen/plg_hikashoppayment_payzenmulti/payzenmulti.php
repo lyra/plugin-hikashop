@@ -27,7 +27,6 @@ if (! class_exists('com_payzenInstallerScript')) {
 
 class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
 {
-
     var $name = 'payzenmulti';
 
     var $accepted_currencies = array();
@@ -96,7 +95,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
 
         $this->vars = array(
             'amount' => $payzenmultiCurrency->convertAmountToInteger($amount),
-            'contrib' => 'HikaShop_2.x-3.x_2.1.1/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
+            'contrib' => 'HikaShop_2.x-3.x_2.1.2/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
             'currency' => $payzenmultiCurrency->getNum(),
             'language' => $payzenmultiLanguage,
             'order_id' => $order->order_number,
@@ -600,16 +599,16 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         return true;
     }
 
-    // Apply amount resrictions of each option of the payment in installements then show the available options in.
-    // Frontend.
+    // Apply amount resrictions of each option of the payment in installements then show the available options in
+    // frontend.
     function onPaymentDisplay(&$order, &$methods, &$usable_methods)
     {
         if (isset($methods)) {
             $order_total = $order->full_total->prices[0]->price_value_with_tax;
             foreach ($methods as $key => $method) {
                 if ($method->payment_type === $this->name) {
-                    $multiOptions = $this->_getAvailbleMultiOptions($method->payment_params->payzen_multi_options,
-                        $order_total);
+                    $multiOptions = property_exists($method->payment_params, "payzen_multi_options") ? $this->_getAvailbleMultiOptions($method->payment_params->payzen_multi_options,
+                        $order_total) : array();
 
                     if (! count($multiOptions)) {
                         unset($methods[$key]);

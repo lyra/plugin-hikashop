@@ -28,7 +28,7 @@ if (isset($this->multivars['contract']) && $this->multivars['contract']) {
 
 <div class="hikashop_payzenmulti_end" id="hikashop_payzenmulti_end">
     <span id="hikashop_payzenmulti_end_message" class="hikashop_payzenmulti_end_message">
-        <?php echo JText::_('PAYZENMULTI_PLEASE_WAIT_BEFORE_REDIRECTION').'<br/>'. JText::_('PAYZENMULTI_CLICK_ON_BUTTON_IF_NOT_REDIRECTED'); ?>
+        <?php echo JText::_('PAYZENMULTI_PLEASE_WAIT_BEFORE_REDIRECTION') . '<br/>' . JText::_('PAYZENMULTI_CLICK_ON_BUTTON_IF_NOT_REDIRECTED'); ?>
     </span>
     <span id="hikashop_payzenmulti_end_spinner" class="hikashop_payzenmulti_end_spinner">
         <img src="<?php echo HIKASHOP_IMAGES . 'spinner.gif'; ?>" />
