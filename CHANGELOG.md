@@ -1,4 +1,7 @@
-2.1.1, 2019-07-15
+2.1.2, 2020-11-12:
+- [multi] Bug fix: Fix error relative to payment in installments when list of options is empty.
+
+2.1.1, 2019-07-15:
 - Escape XML special characters.
  
 2.1.0, 2019-03-15:
@@ -22,4 +25,4 @@
 - Compatibility with commercial version of Hikashop.
 
 1.0, 2013-08-20:
-- New PayZen payment module for HikaShop 2.2.0
+- New PayZen payment module for HikaShop 2.2.0.

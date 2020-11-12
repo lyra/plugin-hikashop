@@ -12,7 +12,6 @@ defined('_JEXEC') or die('Restricted access');
 
 class plghikashoppaymentpayzenInstallerScript
 {
-
     /**
      * Called after any type of action.
      *
@@ -31,7 +30,7 @@ class plghikashoppaymentpayzenInstallerScript
         jimport('joomla.application.helper');
         $client = JApplicationHelper::getClientInfo(- 1);
 
-        // here we set the folder we are going to rename manifest from.
+        // Here we set the folder we are going to rename manifest from.
         if ($client) {
             $path = $adapter->getParent()->getPath('extension_' . $client->name);
         } else {

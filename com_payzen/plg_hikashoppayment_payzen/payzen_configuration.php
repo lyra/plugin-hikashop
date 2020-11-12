@@ -12,7 +12,7 @@ defined('_JEXEC') or die('Restricted access');
 
 $params = $this->element->payment_params;
 
-if (!class_exists('com_payzenInstallerScript')) {
+if (! class_exists('com_payzenInstallerScript')) {
     require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'script.install.php';
 }
 
@@ -37,22 +37,22 @@ if ($plugin_features['shatwo']) {
 $docs = '' ;
 $displayDoc = '';
 
-$filenames = glob(rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS. 'com_payzen' . DS . 'installation_doc/PayZen_HikaShop_2.x-3.x_v2.1_*.pdf');
+$filenames = glob(rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS. 'com_payzen' . DS . 'installation_doc/${doc.pattern}');
 
-if (empty($filenames)) { // hide if there are no doc files
+if (empty($filenames)) { // Hide if there are no doc files.
     $displayDoc = ' style="display: none;"';
 } else {
     $languages = array(
         'fr' => 'Français',
         'en' => 'English',
         'es' => 'Español',
-        'de' => 'Deutsch',
+        'de' => 'Deutsch'
         // Complete when other languages are managed.
     );
 
     foreach ($filenames as $filename) {
         $base_filename = basename($filename, '.pdf');
-        $lang = substr($base_filename, -2); // extract language code
+        $lang = substr($base_filename, -2); // Extract language code.
 
         $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . HIKASHOP_LIVE . 'administrator' . DS . 'components' . DS. 'com_payzen' . DS .
             'installation_doc/' . $base_filename . '.pdf" target="_blank">' . $languages[$lang] . '</a>';
@@ -90,7 +90,7 @@ if (empty($filenames)) { // hide if there are no doc files
                         <label><?php echo JText::_('PAYZEN_CONTRIB_VERSION'); ?></label>
                     </td>
                     <td>
-                        <label>2.1.1</label>
+                        <label>2.1.2</label>
                     </td>
                 </tr>
 

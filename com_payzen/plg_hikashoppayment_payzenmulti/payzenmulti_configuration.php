@@ -12,7 +12,7 @@ defined('_JEXEC') or die('Restricted access');
 
 $params = $this->element->payment_params;
 
-if (!class_exists('com_payzenInstallerScript')) {
+if (! class_exists('com_payzenInstallerScript')) {
     require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'script.install.php';
 }
 
@@ -34,24 +34,24 @@ if ($plugin_features['shatwo']) {
 }
 
 if ($plugin_features['restrictmulti']) {
-    echo '<p style="background: none repeat scroll 0 0 #FFFFE0; border: 1px solid #E6DB55; font-size: 13px; margin: 0 0 20px; padding: 10px;">'.
-         JText::_('PAYZENMULTI_RESTRICT_WARNING'). '</p>';
+    echo '<p style="background: none repeat scroll 0 0 #FFFFE0; border: 1px solid #E6DB55; font-size: 13px; margin: 0 0 20px; padding: 10px;">' .
+         JText::_('PAYZENMULTI_RESTRICT_WARNING') . '</p>';
 };
 
 // Get documentation links.
 $docs = '' ;
 $displayDoc = '';
 
-$filenames = glob(rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS. 'com_payzen' . DS . 'installation_doc/PayZen_HikaShop_2.x-3.x_v2.1_*.pdf');
+$filenames = glob(rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS. 'com_payzen' . DS . 'installation_doc/${doc.pattern}');
 
-if (empty($filenames)) { // hide if there are no doc files
+if (empty($filenames)) { // Hide if there are no doc files.
     $displayDoc = ' style="display: none;"';
 } else {
     $languages = array(
         'fr' => 'Français',
         'en' => 'English',
         'es' => 'Español',
-        'de' => 'Deutsch',
+        'de' => 'Deutsch'
         // Complete when other languages are managed.
     );
 
@@ -95,7 +95,7 @@ if (empty($filenames)) { // hide if there are no doc files
                         <label><?php echo JText::_('PAYZENMULTI_CONTRIB_VERSION'); ?></label>
                     </td>
                     <td>
-                        <label>2.1.1</label>
+                        <label>2.1.2</label>
                     </td>
                 </tr>
 
