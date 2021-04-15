@@ -90,7 +90,7 @@ if (empty($filenames)) { // Hide if there are no doc files.
                         <label><?php echo JText::_('PAYZEN_CONTRIB_VERSION'); ?></label>
                     </td>
                     <td>
-                        <label>2.1.2</label>
+                        <label>2.1.3</label>
                     </td>
                 </tr>
 
