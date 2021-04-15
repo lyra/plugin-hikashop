@@ -82,7 +82,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
 
         $this->vars = array(
             'amount' => $payzenCurrency->convertAmountToInteger($amount),
-            'contrib' => 'HikaShop_2.x-3.x_2.1.2/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
+            'contrib' => 'HikaShop_2.x-3.x_2.1.3/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
             'currency' => $payzenCurrency->getNum(),
             'language' => $payzenLanguage,
             'order_id' => $order->order_number,
@@ -114,7 +114,8 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
 
             'url_return' => HIKASHOP_LIVE .
                 'index.php?option=com_hikashop&ctrl=checkout&task=notify&notif_payment=payzen&tmpl=component&Itemid=' .
-                JRequest::getInt('Itemid')
+                JRequest::getInt('Itemid'),
+            'payment_method_id' => $method_id
         );
 
         $params = array(
@@ -178,14 +179,17 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
             return false;
         }
 
-        $element = reset($elements);
-
         $urlItemId = JRequest::getInt('Itemid') ? '&Itemid=' . JRequest::getInt('Itemid') : '';
 
         require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
             'payzen_response.php';
 
         $data = isset($_POST['vads_order_id']) ? $_POST : $_GET;
+
+        $payment_method_id = isset($data['vads_ext_info_payment_method_id']) ? $data['vads_ext_info_payment_method_id'] : '';
+
+        $element = $this->getElement($elements, $payment_method_id);
+
         $payzenResponse = new PayzenResponse(
             $data,
             $element->payment_params->payzen_ctx_mode,
@@ -556,5 +560,18 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
             fwrite($fLog, "$date - $level : $msg\n");
             fclose($fLog);
         }
+    }
+
+    function getElement($elements, $payment_id)
+    {
+        if ($payment_id) {
+            foreach ($elements as $elem) {
+                if ($elem->payment_id === $payment_id) {
+                    return $elem;
+                }
+            }
+        }
+
+        return reset($elements);
     }
 }

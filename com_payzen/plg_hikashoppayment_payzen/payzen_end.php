@@ -13,6 +13,7 @@ defined('_JEXEC') or die('Restricted access');
 require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
      'payzen_request.php';
 $payzen = new PayzenRequest();
+$payzen->addExtInfo('payment_method_id', $this->vars['payment_method_id']);
 $payzen->setFromArray($this->vars);
 ?>
 

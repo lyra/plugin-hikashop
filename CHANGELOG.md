@@ -1,3 +1,6 @@
+2.1.3, 2021-04-15
+- Bug fix: Fix error relative to load incorrect configuration in case of multiple payment methods.
+
 2.1.2, 2020-11-12:
 - [multi] Bug fix: Fix error relative to payment in installments when list of options is empty.
 
