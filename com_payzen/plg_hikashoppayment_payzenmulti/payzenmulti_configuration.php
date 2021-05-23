@@ -95,7 +95,7 @@ if (empty($filenames)) { // Hide if there are no doc files.
                         <label><?php echo JText::_('PAYZENMULTI_CONTRIB_VERSION'); ?></label>
                     </td>
                     <td>
-                        <label>2.1.3</label>
+                        <label>2.1.4</label>
                     </td>
                 </tr>
 
@@ -371,20 +371,22 @@ if (empty($filenames)) { // Hide if there are no doc files.
             </button>
             <br />
 
-            <table id="payzen_multi_options_table" style="<?php if (empty($multi_options)) echo 'display: none;'; else echo ''; ?>" class="payzen-table" >
-                <thead>
-                    <tr>
-                        <th><?php echo JText::_('PAYZENMULTI_LABEL'); ?></th>
-                        <th><?php echo JText::_('PAYZENMULTI_MIN_AMOUNT'); ?></th>
-                        <th><?php echo JText::_('PAYZENMULTI_MAX_AMOUNT'); ?></th>
-                        <?php if ($cb_avail) echo '<th>'.JText::_('PAYZENMULTI_MAX_CONTRACT').'</th>'; ?>
-                        <th><?php echo JText::_('PAYZENMULTI_COUNT'); ?></th>
-                        <th><?php echo JText::_('PAYZENMULTI_PERIOD'); ?></th>
-                        <th><?php echo JText::_('PAYZENMULTI_FIRST'); ?></th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div id="payzen_multi_options_table" style="<?php if (empty($multi_options)) echo 'display: none;'; ?> overflow-x: scroll;">
+                <div style="width: 200px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><?php echo JText::_('PAYZENMULTI_LABEL'); ?></th>
+                                <th><?php echo JText::_('PAYZENMULTI_MIN_AMOUNT'); ?></th>
+                                <th><?php echo JText::_('PAYZENMULTI_MAX_AMOUNT'); ?></th>
+                                <?php if ($cb_avail) echo '<th>'.JText::_('PAYZENMULTI_MAX_CONTRACT').'</th>'; ?>
+                                <th><?php echo JText::_('PAYZENMULTI_COUNT'); ?></th>
+                                <th><?php echo JText::_('PAYZENMULTI_PERIOD'); ?></th>
+                                <th><?php echo JText::_('PAYZENMULTI_FIRST'); ?></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
     <?php
     if (! empty($multi_options)) {
@@ -414,16 +416,18 @@ if (empty($filenames)) { // Hide if there are no doc files.
 
     ?>
 
-                    <tr id="payzen_multi_option_add">
-                        <td colspan="<?php $colspan = $cb_avail ? '7' : '6'; echo $colspan; ?>"></td>
-                        <td>
-                            <button type="button" onclick="payzenAddOption(false, '<?php echo JText::_('PAYZENMULTI_MULTI_OPTIONS_DELETE'); ?>', <?php echo $str_cb_avail; ?>);" >
-                                <?php echo JText::_('PAYZENMULTI_MULTI_OPTIONS_ADD'); ?>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <tr id="payzen_multi_option_add">
+                                <td colspan="<?php $colspan = $cb_avail ? '7' : '6'; echo $colspan; ?>"></td>
+                                <td>
+                                    <button type="button" onclick="payzenAddOption(false, '<?php echo JText::_('PAYZENMULTI_MULTI_OPTIONS_DELETE'); ?>', <?php echo $str_cb_avail; ?>);" >
+                                        <?php echo JText::_('PAYZENMULTI_MULTI_OPTIONS_ADD'); ?>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <span style="font-size: 10px; font-style: italic;"><?php $numdesc = $cb_avail ? '1' : '2';echo JText::_('PAYZENMULTI_MULTI_OPTIONS_DESC'.$numdesc); ?></span>
         </fieldset>
     </td>
