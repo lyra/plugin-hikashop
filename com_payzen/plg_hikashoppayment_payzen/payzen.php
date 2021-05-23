@@ -82,7 +82,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
 
         $this->vars = array(
             'amount' => $payzenCurrency->convertAmountToInteger($amount),
-            'contrib' => 'HikaShop_2.x-3.x_2.1.3/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
+            'contrib' => 'HikaShop_2.x-3.x_2.1.4/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
             'currency' => $payzenCurrency->getNum(),
             'language' => $payzenLanguage,
             'order_id' => $order->order_number,
