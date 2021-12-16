@@ -82,7 +82,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
 
         $this->vars = array(
             'amount' => $payzenCurrency->convertAmountToInteger($amount),
-            'contrib' => 'HikaShop_2.x-3.x_2.1.4/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
+            'contrib' => 'HikaShop_2.x-4.x_2.1.5/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
             'currency' => $payzenCurrency->getNum(),
             'language' => $payzenLanguage,
             'order_id' => $order->order_number,
@@ -114,7 +114,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
 
             'url_return' => HIKASHOP_LIVE .
                 'index.php?option=com_hikashop&ctrl=checkout&task=notify&notif_payment=payzen&tmpl=component&Itemid=' .
-                JRequest::getInt('Itemid'),
+                JFactory::getApplication()->input->getInt('Itemid'),
             'payment_method_id' => $method_id
         );
 
@@ -159,10 +159,10 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
     {
         $app = JFactory::getApplication();
 
-        if (JRequest::getVar('vads_hash') !== null) {
+        if (JFactory::getApplication()->input->getVar('vads_hash') !== null) {
             // This is a server call.
-            if ((($payCfg = JRequest::getVar('vads_payment_config')) && stripos($payCfg, 'MULTI') !== false) ||
-                (($contrib = JRequest::getVar('vads_contrib')) && stripos($contrib, 'multi') !== false)) {
+            if ((($payCfg = JFactory::getApplication()->input->getVar('vads_payment_config')) && stripos($payCfg, 'MULTI') !== false) ||
+                (($contrib = JFactory::getApplication()->input->getVar('vads_contrib')) && stripos($contrib, 'multi') !== false)) {
 
                 // Multi payment : let multi module do the work.
                 $data = hikashop_import('hikashoppayment', 'payzenmulti');
@@ -179,7 +179,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
             return false;
         }
 
-        $urlItemId = JRequest::getInt('Itemid') ? '&Itemid=' . JRequest::getInt('Itemid') : '';
+        $urlItemId = JFactory::getApplication()->input->getInt('Itemid') ? '&Itemid=' . JFactory::getApplication()->input->getInt('Itemid') : '';
 
         require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
             'payzen_response.php';
@@ -500,7 +500,7 @@ class plgHikashoppaymentPayzen extends hikashopPaymentPlugin
 
         if ($this->plugin_features['qualif']) {
             // Tests will be made on qualif, no test mode available.
-            unset($params['3']); // ctx_mode
+            unset($params['3']); // ctx_mode.
         }
 
         // Instanciate PayzenRequest to validate parameters.

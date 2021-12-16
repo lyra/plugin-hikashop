@@ -43,8 +43,8 @@ if (isset($this->multivars['contract']) && $this->multivars['contract']) {
         echo $payzenmulti->getRequestHtmlFields();
 
         $doc = JFactory::getDocument();
-        $doc->addScriptDeclaration("window.addEvent('domready', function() { document.getElementById('hikashop_payzenmulti_form').submit(); });");
-        JRequest::setVar('noform', 1);
+        $doc->addScriptDeclaration("window.hikashop.ready( function() { document.getElementById('hikashop_payzenmulti_form').submit(); });");
+        hikaInput::get()->set('noform', 1);
         ?>
     </form>
 </div>

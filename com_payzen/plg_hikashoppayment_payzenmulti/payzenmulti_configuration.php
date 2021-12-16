@@ -57,11 +57,11 @@ if (empty($filenames)) { // Hide if there are no doc files.
 
     foreach ($filenames as $filename) {
         $base_filename = basename($filename, '.pdf');
-        $lang = substr($base_filename, -2); // extract language code
+        $lang = substr($base_filename, -2); // Extract language code.
 
         $docs .= '<a style="margin-left: 10px; text-decoration: none; text-transform: uppercase;" href="' . HIKASHOP_LIVE . 'administrator' . DS . 'components' . DS. 'com_payzen' . DS .
             'installation_doc/' . $base_filename . '.pdf" target="_blank">' . $languages[$lang] . '</a>';
-    };
+    }
 }
 ?>
 
@@ -95,7 +95,7 @@ if (empty($filenames)) { // Hide if there are no doc files.
                         <label><?php echo JText::_('PAYZENMULTI_CONTRIB_VERSION'); ?></label>
                     </td>
                     <td>
-                        <label>2.1.4</label>
+                        <label>2.1.5</label>
                     </td>
                 </tr>
 
@@ -371,7 +371,7 @@ if (empty($filenames)) { // Hide if there are no doc files.
             </button>
             <br />
 
-            <div id="payzen_multi_options_table" style="<?php if (empty($multi_options)) echo 'display: none;'; ?> overflow-x: scroll;">
+            <div id="payzen_multi_options_table" style="<?php if (empty($multi_options)) echo 'display: none;'; ?> overflow-x: scroll; width: 100%;">
                 <div style="width: 200px;">
                     <table>
                         <thead>

@@ -20,7 +20,7 @@ class plghikashoppaymentpayzenmultiInstallerScript
      *
      * @return boolean True on success
      */
-    function postflight($route, JAdapterInstance $adapter)
+    function postflight($route, $adapter)
     {
         if ($route != 'install' && $route != 'update' && $route != 'discover_install') {
             return;
@@ -30,7 +30,7 @@ class plghikashoppaymentpayzenmultiInstallerScript
         jimport('joomla.application.helper');
         $client = JApplicationHelper::getClientInfo(- 1);
 
-        // here we set the folder we are going to rename manifest from.
+        // Here we set the folder we are going to rename manifest from.
         if ($client) {
             $path = $adapter->getParent()->getPath('extension_' . $client->name);
         } else {
@@ -40,7 +40,7 @@ class plghikashoppaymentpayzenmultiInstallerScript
         JFile::move('payzenmulti_j3.xml', 'payzenmulti.xml', $path);
     }
 
-    function preflight($type, JAdapterInstance $adapter)
+    function preflight($type, $adapter)
     {
         if ($type === 'uninstall') {
             require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_hikashop' . DS . 'helpers' . DS .

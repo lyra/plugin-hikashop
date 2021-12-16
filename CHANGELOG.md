@@ -1,3 +1,6 @@
+2.1.5, 2021-12-16:
+- Compatibility with HikaShop 4.x versions.
+
 2.1.4, 2021-05-23:
 - [multi] Bug fix: Fix payment in installments options display on HikaShop backend.
 
