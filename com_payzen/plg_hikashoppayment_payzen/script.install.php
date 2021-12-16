@@ -20,7 +20,7 @@ class plghikashoppaymentpayzenInstallerScript
      *
      * @return boolean True on success
      */
-    function postflight($route, JAdapterInstance $adapter)
+    function postflight($route, $adapter)
     {
         if ($route != 'install' && $route != 'update' && $route != 'discover_install') {
             return;
@@ -40,7 +40,7 @@ class plghikashoppaymentpayzenInstallerScript
         JFile::move('payzen_j3.xml', 'payzen.xml', $path);
     }
 
-    function preflight($type, JAdapterInstance $adapter)
+    function preflight($type, $adapter)
     {
         if ($type === 'uninstall') {
             require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_hikashop' . DS . 'helpers' . DS .

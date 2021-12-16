@@ -51,7 +51,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
     function onPaymentSave(&$cart, &$rates, &$payment_id)
     {
         $session = JFactory::getSession();
-        $session->set('payzen_multi_option', JRequest::getVar('payzen_multi_option'));
+        $session->set('payzen_multi_option', JFactory::getApplication()->input->getVar('payzen_multi_option'));
 
         return parent::onPaymentSave($cart, $rates, $payment_id);
     }
@@ -95,7 +95,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
 
         $this->vars = array(
             'amount' => $payzenmultiCurrency->convertAmountToInteger($amount),
-            'contrib' => 'HikaShop_2.x-3.x_2.1.4/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
+            'contrib' => 'HikaShop_2.x-4.x_2.1.5/' . JVERSION . '_' . $config->get('version') . '/' . PHP_VERSION,
             'currency' => $payzenmultiCurrency->getNum(),
             'language' => $payzenmultiLanguage,
             'order_id' => $order->order_number,
@@ -127,7 +127,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
 
             'url_return' => HIKASHOP_LIVE .
                 'index.php?option=com_hikashop&ctrl=checkout&task=notify&notif_payment=payzenmulti&tmpl=component&Itemid=' .
-                JRequest::getInt('Itemid'),
+                JFactory::getApplication()->input->getInt('Itemid'),
             'payment_method_id' => $method_id
         );
 
@@ -159,7 +159,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             $this->vars['ctx_mode'] ='PRODUCTION';
         }
 
-        // Prepare payment in installements data.
+        // Prepare payment in installments data.
         $multiOptions = $this->payment_params->payzen_multi_options;
 
         $session = JFactory::getSession();
@@ -190,12 +190,12 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
     {
         $app = JFactory::getApplication();
 
-        if (JRequest::getVar('vads_hash') !== null) {
+        if (JFactory::getApplication()->input->getVar('vads_hash') !== null) {
             // This is a server call.
-            if ((! ($payCfg = JRequest::getVar('vads_payment_config')) || stripos($payCfg, 'MULTI') === false) &&
-                 (! ($contrib = JRequest::getVar('vads_contrib')) || stripos($contrib, 'multi') === false)) {
+            if ((! ($payCfg = JFactory::getApplication()->input->getVar('vads_payment_config')) || stripos($payCfg, 'MULTI') === false) &&
+                (! ($contrib = JFactory::getApplication()->input->getVar('vads_contrib')) || stripos($contrib, 'multi') === false)) {
 
-                // Single payment : let Single module do the work.
+                // Single payment : let single module do the work.
                 $data = hikashop_import('hikashoppayment', 'payzen');
                 if (! empty($data)) {
                     return $data->onPaymentNotification($statuses);
@@ -210,7 +210,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
             return false;
         }
 
-        $urlItemId = JRequest::getInt('Itemid') ? '&Itemid=' . JRequest::getInt('Itemid') : '';
+        $urlItemId = JFactory::getApplication()->input->getInt('Itemid') ? '&Itemid=' . JFactory::getApplication()->input->getInt('Itemid') : '';
 
         require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
              'payzen_response.php';
@@ -426,7 +426,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         if ($payzenmultiResponse->get('card_brand')) {
             $info .= ' | ' . JText::_('PAYZENMULTI_CC_TYPE') . $payzenmultiResponse->get('card_brand');
 
-            // Add  card brand user choice.
+            // Add card brand user choice.
             if ($payzenmultiResponse->get('brand_management')) {
                 $brand_info = json_decode($payzenmultiResponse->get('brand_management'));
                 $msg_brand_choice = '';
@@ -575,7 +575,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
 
         if ($this->plugin_features['qualif']) {
             // Tests will be made on qualif, no test mode available.
-            unset($params['3']); // ctx_mode
+            unset($params['3']); // ctx_mode.
         }
 
         // Instanciate PayzenRequest to validate parameters.
@@ -604,7 +604,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         return true;
     }
 
-    // Apply amount resrictions of each option of the payment in installements then show the available options in
+    // Apply amount resrictions of each option of the payment in installments then show the available options in
     // frontend.
     function onPaymentDisplay(&$order, &$methods, &$usable_methods)
     {
@@ -652,7 +652,7 @@ class plgHikashoppaymentPayzenmulti extends hikashopPaymentPlugin
         return $available_options;
     }
 
-    // Show payment in installements options in frontend.
+    // Show payment in installments options in frontend.
     function _getCustomHtml($multiOptions)
     {
         $title = (count($multiOptions) === 1) ? JText::_('PAYZENMULTI_ONE_OPTION_SELECT_TITLE') :
