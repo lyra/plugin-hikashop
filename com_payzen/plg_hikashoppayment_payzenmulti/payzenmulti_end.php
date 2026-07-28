@@ -10,12 +10,17 @@
 
 defined('_JEXEC') or die('Restricted access');
 
-require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
-     'payzen_request.php';
-$payzenmulti = new PayzenRequest();
-$payzenmulti->addExtInfo('payment_method_id', $this->vars['payment_method_id']);
-$payzenmulti->setFromArray($this->vars);
-$payzenmulti->setMultiPayment(
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text as JText;
+
+require_once rtrim(JPATH_ADMINISTRATOR, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR . 'com_payzen' . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'sdk-autoload.php';
+require_once rtrim(JPATH_ADMINISTRATOR, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR . 'com_payzen' . DIRECTORY_SEPARATOR . 'script.install.php';
+
+$payzenRequest = new \Lyranetwork\Payzen\Sdk\Form\Request();
+$payzenRequest->addExtInfo('payment_method_id', $this->vars['payment_method_id']);
+$payzenRequest->setFromArray($this->vars);
+
+$payzenRequest->setMultiPayment(
     null /* Let API use already set amount. */,
     $this->multivars['first'],
     $this->multivars['count'],
@@ -23,8 +28,12 @@ $payzenmulti->setMultiPayment(
 );
 
 if (isset($this->multivars['contract']) && $this->multivars['contract']) {
-    $payzenmulti->set('contracts', $this->multivars['contract']);
+    $payzenRequest->set('contracts', $this->multivars['contract']);
 }
+
+// Log data that will be sent to payment gateway.
+$msg =('Data to be sent to payment gateway : ' . print_r($payzenRequest->getRequestFieldsArray(true /* To hide sensitive data. */), true));
+com_payzenInstallerScript::log($msg, 'payzenmulti.log');
 ?>
 
 <div class="hikashop_payzenmulti_end" id="hikashop_payzenmulti_end">
@@ -35,14 +44,14 @@ if (isset($this->multivars['contract']) && $this->multivars['contract']) {
         <img src="<?php echo HIKASHOP_IMAGES . 'spinner.gif'; ?>" />
     </span>
     <br/>
-    <form id="hikashop_payzenmulti_form" name="hikashop_payzenmulti_form" action="<?php echo $payzenmulti->get('platform_url'); ?>" method="post">
+    <form id="hikashop_payzenmulti_form" name="hikashop_payzenmulti_form" action="<?php echo $payzenRequest->get('platform_url'); ?>" method="post">
         <div id="hikashop_payzenmulti_end_image" class="hikashop_payzenmulti_end_image">
             <input id="hikashop_payzenmulti_button" type="submit" value="<?php echo JText::_('PAYZENMULTI_SEND_BTN_VALUE'); ?>" name="" alt="<?php echo JText::_('PAYZENMULTI_SEND_BTN_ALT'); ?>" />
         </div>
         <?php
-        echo $payzenmulti->getRequestHtmlFields();
+        echo $payzenRequest->getRequestHtmlFields();
 
-        $doc = JFactory::getDocument();
+        $doc = Factory::getApplication()->getDocument();
         $doc->addScriptDeclaration("window.hikashop.ready( function() { document.getElementById('hikashop_payzenmulti_form').submit(); });");
         hikaInput::get()->set('noform', 1);
         ?>

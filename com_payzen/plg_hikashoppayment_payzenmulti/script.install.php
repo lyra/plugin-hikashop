@@ -10,7 +10,27 @@
 
 defined('_JEXEC') or die('Restricted access');
 
-class plghikashoppaymentpayzenmultiInstallerScript
+// Use modern Joomla\Filesystem\File for Joomla 6 (CMS namespace is deprecated)
+if (! class_exists('\\Joomla\\Filesystem\\File')) {
+    class_alias('\\Joomla\\CMS\\Filesystem\\File', '\\Joomla\\Filesystem\\File');
+}
+use Joomla\Filesystem\File;
+
+// Use InstallerScriptBase if available (Joomla 4+), otherwise use base installer script
+/**
+ * Compatibility base class for the multi-payment installer script.
+ *
+ * Extends {@see \Joomla\CMS\Installer\InstallerScriptBase} on Joomla 4+ and
+ * falls back to an empty class on earlier versions.
+ */
+if (class_exists('\\Joomla\\CMS\\Installer\\InstallerScriptBase')) {
+    require_once JPATH_LIBRARIES . '/src/CMS/Installer/InstallerScriptBase.php';
+    class plghikashoppaymentpayzenmultiInstallerScriptBase extends \Joomla\CMS\Installer\InstallerScriptBase {}
+} else {
+    class plghikashoppaymentpayzenmultiInstallerScriptBase {}
+}
+
+class plghikashoppaymentpayzenmultiInstallerScript extends plghikashoppaymentpayzenmultiInstallerScriptBase
 {
     /**
      * Called after any type of action.
@@ -22,41 +42,34 @@ class plghikashoppaymentpayzenmultiInstallerScript
      */
     function postflight($route, $adapter)
     {
-        if ($route != 'install' && $route != 'update' && $route != 'discover_install') {
-            return;
-        }
-
-        // Get the client info.
-        jimport('joomla.application.helper');
-        $client = JApplicationHelper::getClientInfo(- 1);
-
-        // Here we set the folder we are going to rename manifest from.
-        if ($client) {
-            $path = $adapter->getParent()->getPath('extension_' . $client->name);
-        } else {
-            $path = $adapter->getParent()->getPath('extension_root');
-        }
-
-        JFile::move('payzenmulti_j3.xml', 'payzenmulti.xml', $path);
+        return true;
     }
 
+    /**
+     * Called before any type of action.
+     *
+     * @param string $route Which action is happening (install|uninstall|discover_install|update)
+     * @param JAdapterInstance $adapter The object responsible for running this script
+     *
+     * @return boolean True on success
+     */
     function preflight($type, $adapter)
     {
         if ($type === 'uninstall') {
-            require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_hikashop' . DS . 'helpers' . DS .
-                 'helper.php';
-            jimport('joomla.filesystem.folder');
-            jimport('joomla.filesystem.file');
+            require_once rtrim(JPATH_ADMINISTRATOR, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR . 'com_hikashop' .
+                DIRECTORY_SEPARATOR . 'helpers' . DIRECTORY_SEPARATOR . 'helper.php';
 
             $targetFolder = HIKASHOP_IMAGES . 'payment';
 
-            if (JFile::exists($targetFolder . DS . 'payzenmulti_cards.png')) {
-                JFile::delete($targetFolder . DS . 'payzenmulti_cards.png');
+            if (File::exists($targetFolder . DIRECTORY_SEPARATOR . 'payzenmulti_cards.png')) {
+                File::delete($targetFolder . DIRECTORY_SEPARATOR . 'payzenmulti_cards.png');
             }
 
-            if (JFile::exists($targetFolder . DS . 'payzenmulti.png')) {
-                JFile::delete($targetFolder . DS . 'payzenmulti.png');
+            if (File::exists($targetFolder . DIRECTORY_SEPARATOR . 'payzenmulti.png')) {
+                File::delete($targetFolder . DIRECTORY_SEPARATOR . 'payzenmulti.png');
             }
         }
+
+        return true;
     }
 }

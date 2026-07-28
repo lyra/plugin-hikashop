@@ -10,18 +10,18 @@
  */
 -->
 
-<install type="plugin" version="1.5" method="upgrade" group="hikashoppayment">
+<extension type="plugin" version="4.0" method="upgrade" group="hikashoppayment">
     <name><![CDATA[PayZen payment plugin]]></name>
     <creationDate>July</creationDate>
-    <version>2.1.5</version>
+    <version>2.2.0</version>
     <author>Lyra Network</author>
-    <authorEmail>support@payzen.eu</authorEmail>
+    <authorEmail>https://payzen.io/fr-FR/support/</authorEmail>
     <authorUrl>https://www.lyra.com/</authorUrl>
-    <copyright>Copyright (C) 2013-2019 Lyra Network. All rights reserved.</copyright>
+    <copyright>Copyright (C) 2013-2026 Lyra Network. All rights reserved.</copyright>
     <license>http://www.gnu.org/licenses/gpl.html GNU General Public License (GPL v3)</license>
     <description><![CDATA[This plugin enables you to setup the PayZen payment gateway.]]></description>
 
-    <installfile>script.install.php</installfile>
+    <scriptfile>script.install.php</scriptfile>
 
     <files>
         <filename plugin="payzen">payzen.php</filename>
@@ -31,10 +31,11 @@
     </files>
 
     <languages>
-        <language tag="fr-FR">languages/fr-FR.plg_hikashoppayment_payzen.ini</language>
-        <language tag="en-GB">languages/en-GB.plg_hikashoppayment_payzen.ini</language>
-        <language tag="de-DE">languages/de-DE.plg_hikashoppayment_payzen.ini</language>
-        <language tag="es-ES">languages/es-ES.plg_hikashoppayment_payzen.ini</language>
+        <language tag="fr-FR">language/fr-FR/fr-FR.plg_hikashoppayment_payzen.ini</language>
+        <language tag="en-GB">language/en-GB/en-GB.plg_hikashoppayment_payzen.ini</language>
+        <language tag="de-DE">language/de-DE/de-DE.plg_hikashoppayment_payzen.ini</language>
+        <language tag="es-ES">language/es-ES/es-ES.plg_hikashoppayment_payzen.ini</language>
+        <language tag="pt-BR">language/pt-BR/pt-BR.plg_hikashoppayment_payzen.ini</language>
     </languages>
 
     <params addpath="/components/com_hikashop/params">
@@ -48,4 +49,4 @@
             </fieldset>
         </fields>
     </config>
-</install>
+</extension>
