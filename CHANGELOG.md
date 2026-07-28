@@ -1,3 +1,11 @@
+2.2.0, 2026-07-28:
+- Compatibility with Joomla 6.x and HikaShop 6.x versions.
+- Update list of supported payment means.
+- Update list of supported currencies.
+- Added field for online module documentation.
+- Added new transaction statuses.
+- Added Portuguese translation.
+
 2.1.5, 2021-12-16:
 - Compatibility with HikaShop 4.x versions.
 
@@ -12,7 +20,7 @@
 
 2.1.1, 2019-07-15:
 - Escape XML special characters.
- 
+
 2.1.0, 2019-03-15:
 - Enable signature algorithm selection (SHA-1 or HMAC-SHA-256).
 - Added Spanish translation.

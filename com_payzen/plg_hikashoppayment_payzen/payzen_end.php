@@ -10,11 +10,20 @@
 
 defined('_JEXEC') or die('Restricted access');
 
-require_once rtrim(JPATH_ADMINISTRATOR, DS) . DS . 'components' . DS . 'com_payzen' . DS . 'classes' . DS .
-     'payzen_request.php';
-$payzen = new PayzenRequest();
-$payzen->addExtInfo('payment_method_id', $this->vars['payment_method_id']);
-$payzen->setFromArray($this->vars);
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text as JText;
+
+require_once rtrim(JPATH_ADMINISTRATOR, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR . 'com_payzen' . DIRECTORY_SEPARATOR . 'classes/sdk-autoload.php';
+require_once rtrim(JPATH_ADMINISTRATOR, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'components' . DIRECTORY_SEPARATOR . 'com_payzen' . DIRECTORY_SEPARATOR . 'script.install.php';
+
+$payzenRequest = new \Lyranetwork\Payzen\Sdk\Form\Request();
+$payzenRequest->addExtInfo('payment_method_id', $this->vars['payment_method_id']);
+$payzenRequest->setFromArray($this->vars);
+
+// Log data that will be sent to payment gateway.
+$msg =('Data to be sent to payment gateway : ' . print_r($payzenRequest->getRequestFieldsArray(true /* To hide sensitive data. */), true));
+com_payzenInstallerScript::log($msg, 'payzen.log');
+
 ?>
 
 <div class="hikashop_payzen_end" id="hikashop_payzen_end">
@@ -25,14 +34,14 @@ $payzen->setFromArray($this->vars);
         <img src="<?php echo HIKASHOP_IMAGES . 'spinner.gif'; ?>" />
     </span>
     <br/>
-    <form id="hikashop_payzen_form" name="hikashop_payzen_form" action="<?php echo $payzen->get('platform_url'); ?>" method="post">
+    <form id="hikashop_payzen_form" name="hikashop_payzen_form" action="<?php echo $payzenRequest->get('platform_url'); ?>" method="post">
         <div id="hikashop_payzen_end_image" class="hikashop_payzen_end_image">
             <input id="hikashop_payzen_button" type="submit" value="<?php echo JText::_('PAYZEN_SEND_BTN_VALUE'); ?>" name="" alt="<?php echo JText::_('PAYZEN_SEND_BTN_ALT'); ?>" />
         </div>
         <?php
-        echo $payzen->getRequestHtmlFields();
+        echo $payzenRequest->getRequestHtmlFields();
 
-        $doc = JFactory::getDocument();
+        $doc = Factory::getApplication()->getDocument();
         $doc->addScriptDeclaration("window.hikashop.ready( function() { document.getElementById('hikashop_payzen_form').submit(); });");
         hikaInput::get()->set('noform', 1);
         ?>
