@@ -80,7 +80,7 @@ foreach (\Lyranetwork\Payzen\Sdk\Form\Api::getOnlineDocUri() as $lang => $docUri
                         <label><?php echo JText::_('PAYZENMULTI_CONTRIB_VERSION'); ?></label>
                     </td>
                     <td>
-                        <label>2.2.0</label>
+                        <label>2.2.1</label>
                     </td>
                 </tr>
 
