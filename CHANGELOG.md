@@ -1,3 +1,6 @@
+2.2.1, 2026-09-15:
+- Bug fix: Remove BOM from script.install.php file.
+
 2.2.0, 2026-07-28:
 - Compatibility with Joomla 6.x and HikaShop 6.x versions.
 - Update list of supported payment means.
