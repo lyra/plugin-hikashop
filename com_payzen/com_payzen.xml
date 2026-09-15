@@ -13,7 +13,7 @@
 <extension type="component" version="4.0" method="upgrade">
     <name><![CDATA[PayZen]]></name>
     <creationDate>July</creationDate>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
     <author>Lyra Network</author>
     <authorEmail>https://payzen.io/fr-FR/support/</authorEmail>
     <authorUrl>https://www.lyra.com/</authorUrl>
